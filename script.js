@@ -1,4 +1,3 @@
-let body = document.querySelector("body");
 
 let fileInput = document.getElementById("fileInput");
 
@@ -13,8 +12,14 @@ function handleExcel(e) {
     const workbook = XLSX.read(data, { type: "array" });
     const firstSheet = convertSheetToJson("ראשי", workbook);
     const N = convertSheetToJson("נ מרוכז", workbook);
-    handleTravelRegular(N, firstSheet);
-    handleTravel75(N, firstSheet)
+
+    const indexOfType = findIndex(N[0], "שם הרכיב");
+    const indexPriceInN = findIndex(N[0], "מחיר");
+    const indexAmountInN = findIndex(N[0], "כמות");
+  const indexMonthlyInN = findIndex(N[0], "תשלום");
+
+    handleTravelRegular(N, firstSheet,indexOfType,indexPriceInN,indexAmountInN,indexMonthlyInN);
+    handleTravel75(N, firstSheet,indexOfType)
     console.log(N, firstSheet);
     createNewExcel(firstSheet);
   };
@@ -28,26 +33,54 @@ function convertSheetToJson(sheetName, workbook) {
   return jsonData;
 }
 
-function handleTravelRegular(n, firstSheet) {
-  const indexOfType = findIndex(n[0], "שם הרכיב");
-  const indexPriceInN = findIndex(n[0], "מחיר");
+function handleTravelRegular(n, firstSheet,indexOfType,indexPriceInN,indexAmountInN,indexMonthlyInN) {
   const indexPriceInFirstSheet = findIndex(firstSheet[0], "נסיעות תעריף");
+  const indexAmountInFirstSheet = findIndex(firstSheet[0], "נסיעות כמות");
+  const indexMonthlyInFirstSheet = findIndex(firstSheet[0], "נסיעות סכום");
 
   for (i = 1; i < n.length - 1; i++) {
     if (n[i][indexOfType] === "נסיעות") {
       const workerNumber = n[i][0];
-
       for (j = 0; j < firstSheet.length - 1; j++) {
         if (firstSheet[j][0] === workerNumber) {
-          firstSheet[j][indexPriceInFirstSheet] = n[i][indexPriceInN];
+          if(n[i][indexAmountInN]){
+            firstSheet[j][indexPriceInFirstSheet] = n[i][indexPriceInN];
+            firstSheet[j][indexAmountInFirstSheet] = n[i][indexAmountInN]
+            } else {
+firstSheet[j][indexMonthlyInFirstSheet] = n[i][indexMonthlyInN]
+            }
         }
       }
     }
   }
 }
 
-function handleTravel75(n, firstSheet) {
-  const indexOfType = findIndex(n[0], "שם הרכיב");
+// function handleTravelRegular(n, firstSheet,indexOfType) {
+//   const indexPriceInN = findIndex(n[0], "מחיר");
+//   const indexAmountInN = findIndex(n[0], "כמות");
+//   const indexPriceInFirstSheet = findIndex(firstSheet[0], "נסיעות תעריף");
+//   const indexAmountInFirstSheet = findIndex(firstSheet[0], "נסיעות כמות");
+//   const indexMonthlyInN = findIndex(n[0], "תשלום");
+//   const indexMonthlyInFirstSheet = findIndex(firstSheet[0], "נסיעות סכום");
+
+//   for (i = 1; i < n.length - 1; i++) {
+//     if (n[i][indexOfType] === "נסיעות") {
+//       const workerNumber = n[i][0];
+//       for (j = 0; j < firstSheet.length - 1; j++) {
+//         if (firstSheet[j][0] === workerNumber) {
+//           if(n[i][indexAmountInN]){
+//             firstSheet[j][indexPriceInFirstSheet] = n[i][indexPriceInN];
+//             firstSheet[j][indexAmountInFirstSheet] = n[i][indexAmountInN]
+//             } else {
+// firstSheet[j][indexMonthlyInFirstSheet] = n[i][indexAmountInN]
+//             }
+//         }
+//       }
+//     }
+//   }
+// }
+
+function handleTravel75(n, firstSheet,indexOfType) {
   const indexPriceInFirstSheet = findIndex(firstSheet[0], "נסיעות 75");
 
   for (i = 1; i < n.length - 1; i++) {
