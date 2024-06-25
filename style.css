@@ -1,0 +1,55 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    text-align: center; /* Center text horizontally */
+}
+
+input[type="file"] {
+    display: block;
+    margin: 20px auto;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: relative;
+    width: 200px; /* Adjust width as needed */
+}
+
+input[type="file"]:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+}
+
+#errorContainer {
+    margin-top: 20px;
+}
+
+#errorTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#errorTable th, #errorTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#errorTable th {
+    background-color: #f2f2f2;
+}

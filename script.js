@@ -4,6 +4,13 @@ fileInput.addEventListener("change", handleExcel);
 
 function handleExcel(e) {
   const file = e.target.files[0];
+
+  if (!file) {
+    errors.push("No file selected");
+    displayErrors(errors);
+    return;
+  }
+
   const reader = new FileReader();
 
   reader.onload = function (event) {
@@ -28,7 +35,9 @@ let variables = {N, firstSheet,indexOfType,indexPriceInN,indexAmountInN,indexMon
     console.log(N, firstSheet);
     console.log(errors)
     deleteAllNAs(firstSheet)
-    createNewExcel(firstSheet);
+    createNewExcel(firstSheet,errors);
+    handleErrors(errors)
+
   };
 
   reader.readAsArrayBuffer(file);
@@ -133,10 +142,16 @@ function deleteAllNAs(data) {
   }
 }
 
-function createNewExcel(data) {
+function createNewExcel(data, errors) {
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(data);
-  XLSX.utils.book_append_sheet(workbook, worksheet);
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+
+  const errorsArray = errors.map(error => [error]);
+  const worksheetErrors = XLSX.utils.aoa_to_sheet(errorsArray);
+  XLSX.utils.book_append_sheet(workbook, worksheetErrors, "Errors");
+
   XLSX.writeFile(workbook, "חדש.xlsx");
 }
 
@@ -157,7 +172,7 @@ function logic(thisType,variables, indexPriceInFirstSheet, indexAmountInFirstShe
           } else if (n[i][variables.indexMonthlyInN]) {
             firstSheet[j][indexMonthlyInFirstSheet] = n[i][variables.indexMonthlyInN];
           } else {
-            errors.push(`${workerNumber} suppose to have ${thisType} but don't have any price`);
+            errors.push(`${workerNumber} have ${thisType} but don't have any price`);
           }
         }
       }
@@ -169,4 +184,19 @@ function logic(thisType,variables, indexPriceInFirstSheet, indexAmountInFirstShe
   if (!n.some(row => row[variables.indexOfType] === thisType)) {
     errors.push(`couldn't find a worker with ${thisType}`);
   }
+}
+
+function handleErrors(errors){
+  const errorContainer = document.getElementById("errorContainer");
+  if (errors.length === 0) {
+    errorContainer.innerHTML = "<p>No errors found</p>";
+    return;
+  }
+  let table = `<table id="errorTable"><thead><tr><th>Error Messages</th></tr></thead><tbody>`;
+  errors.forEach(error => {
+    table += `<tr><td>${error}</td></tr>`;
+  });
+  table += `</tbody></table>`;
+
+  errorContainer.innerHTML = table;
 }
