@@ -32,6 +32,7 @@ let variables = {N, firstSheet,indexOfType,indexPriceInN,indexAmountInN,indexMon
     handleTravel75(N, firstSheet,indexOfType)
     handleTravelRegularSenior(variables)
     handleTravelDiscountSenior(variables)
+    handleTravelExtra(variables)
     console.log(N, firstSheet);
     console.log(errors)
     deleteAllNAs(firstSheet)
@@ -85,6 +86,17 @@ function handleTravelRegularSenior(variables) {
  logic("נסיעות ותיק", variables,indexPriceInFirstSheet,indexAmountInFirstSheet,indexMonthlyInFirstSheet,errors)
 }
 
+
+function handleTravelExtra(variables) {
+  const firstSheet = variables.firstSheet
+  const indexPriceInFirstSheet = findIndex(firstSheet[0], "תוספת נסיעות תעריף");
+  const indexAmountInFirstSheet = findIndex(firstSheet[0], "תוספת נסיעות כמות");
+  const indexMonthlyInFirstSheet = findIndex(firstSheet[0], "תוספת נסיעות סכום");
+
+ logic("תוספת נסיעות", variables,indexPriceInFirstSheet,indexAmountInFirstSheet,indexMonthlyInFirstSheet,errors)
+}
+
+
 function handleTravelDiscountSenior(variables) {
   const firstSheet = variables.firstSheet
   const N = variables.N
@@ -94,11 +106,9 @@ function handleTravelDiscountSenior(variables) {
   for (i = 1; i < variables.N.length - 1; i++) {
     if (N[i][variables.indexOfType] === "נסיעות מ ותיק") {
       const workerNumber = N[i][0];
-debugger
       for (j = 0; j < firstSheet.length - 1; j++) {
         if (firstSheet[j][0] === workerNumber) {
           firstSheet[j][indexPriceInFirstSheet] = variables.N[i][variables.indexMonthlyInN];
-          debugger
         }
       }
     }
@@ -111,11 +121,10 @@ function handleTravel75(n, firstSheet,indexOfType) {
   for (i = 1; i < n.length - 1; i++) {
     if (n[i][indexOfType] === "נסיעות 75") {
       const workerNumber = n[i][0];
-debugger
+
       for (j = 0; j < firstSheet.length - 1; j++) {
         if (firstSheet[j][0] === workerNumber) {
           firstSheet[j][indexPriceInFirstSheet] = 1;
-          debugger
         }
       }
     }
@@ -200,3 +209,5 @@ function handleErrors(errors){
 
   errorContainer.innerHTML = table;
 }
+
+
