@@ -114,8 +114,37 @@ function handleTravelExtra(variables) {
 }
 
 function handleTravelDiscountSenior(variables) {
-  updateIndexesForType(variables, "נסיעות מ תעריף", "נסיעות מ כמות", "נסיעות מ סכום");
-  logic("נסיעות מ ותיק", variables, 20, 5.5, 44.5);
+  const { N, firstSheet, indexOfType, indexPriceInFirstSheet, indexAmountInFirstSheet, indexMonthlyInFirstSheet, indexWorkDays, indexPriceInN, indexMonthlyInN } = variables;
+
+  N.forEach((row, i) => {
+    if (i === 0 || i === N.length - 1) return;
+
+    if (row[indexOfType] === "נסיעות מ ותיק") {
+      const workerNumber = row[0];
+      let found = false;
+
+      firstSheet.forEach((firstSheetRow, j) => {
+        if (j === 0 || j === firstSheet.length - 1) return;
+
+        if (firstSheetRow[0] === workerNumber) {
+          found = true;
+          if (firstSheetRow[indexWorkDays] <= 8) {
+            firstSheetRow[findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 11;
+          } else if (firstSheetRow[indexWorkDays] > 8) {
+            firstSheetRow[findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 44.5;
+          } else {
+            errors.push(`${workerNumber} has "נסיעות מ ותיק" but no price`);
+          }
+        }
+      });
+
+      if (!found) errors.push(`Couldn't find ${workerNumber} in the main sheet`);
+    }
+  });
+
+  if (!N.some(row => row[indexOfType] === "נסיעות מ ותיק")) {
+    errors.push(`Couldn't find a worker with  נסיעות מ ותיק`);
+  }
 }
 
 function handleTravel75(variables) {
