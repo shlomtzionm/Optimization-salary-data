@@ -95,7 +95,7 @@ function handleTravelExtra(variables) {
           if (row[findIndex(N[0],"מחיר")]) {
             firstSheetRow[indexPriceInFirstSheet] = row[indexPriceInN];
             firstSheetRow[indexAmountInFirstSheet] = firstSheetRow[indexWorkDays];
-            debugger
+          
           } else if (row[indexMonthlyInN]) {
             firstSheetRow[indexMonthlyInFirstSheet] = row[indexMonthlyInN];
           } else {
@@ -132,6 +132,7 @@ function handleTravelDiscountSenior(variables) {
             firstSheetRow[findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 11;
           } else if (firstSheetRow[indexWorkDays] > 8) {
             firstSheetRow[findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 44.5;
+            
           } else {
             errors.push(`${workerNumber} has "נסיעות מ ותיק" but no price`);
           }
