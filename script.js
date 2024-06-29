@@ -17,8 +17,10 @@ function handleExcel(e) {
     const workbook = XLSX.read(data, { type: "array" });
     const firstSheet = convertSheetToJson("ראשי", workbook);
     const N = convertSheetToJson("נ מרוכז", workbook);
+    console.log(firstSheet,N)
 
     if (!firstSheet || !N) {
+      errors.push("upload a new file")
       handleErrors(errors);
       return;
     }
@@ -35,15 +37,15 @@ function handleExcel(e) {
       indexMonthlyInFirstSheet: null
     };
 
-    checkIfEveryoneHaveTravel(variables.firstSheet, variables.N)
+    // checkIfEveryoneHaveTravel(variables.firstSheet, variables.N)
     handleTravelRegular(variables);
-    handleTravelRegularDiscount(variables);
-    handleTravel75(variables);
-    handleTravelRegularSenior(variables);
-    handleTravelDiscountSenior(variables);
-    handleTravelExtra(variables);
+    // handleTravelRegularDiscount(variables);
+    // handleTravel75(variables);
+    // handleTravelRegularSenior(variables);
+    // handleTravelDiscountSenior(variables);
+    // handleTravelExtra(variables);
 
-    deleteAllNAs(firstSheet);
+    // deleteAllNAs(firstSheet);
     createNewExcel(firstSheet, errors);
     handleErrors(errors);
   };
@@ -80,68 +82,66 @@ function handleTravelExtra(variables) {
 
   const { N, firstSheet, indexOfType, indexPriceInFirstSheet, indexAmountInFirstSheet, indexMonthlyInFirstSheet, indexWorkDays, indexPriceInN, indexMonthlyInN } = variables;
 
-  N.forEach((row, i) => {
-    if (i === 0 || i === N.length - 1) return;
-
-    if (row[indexOfType] === "תוספת נסיעות") {
-      const workerNumber = row[0];
+ for (i=1;i<N.length-1;i++) {
+   
+    if (N[i][indexOfType] === "תוספת נסיעות") {
+ 
+       workerNumber = N[i][0];
       let found = false;
 
-      firstSheet.forEach((firstSheetRow, j) => {
-        if (j === 0 || j === firstSheet.length - 1) return;
-
-        if (firstSheetRow[0] === workerNumber) {
+      for (j=1;j<firstSheet.length-1;j++) {
+        
+        if (firstSheet[j][0] === workerNumber) {
           found = true;
-          if (row[findIndex(N[0],"מחיר")]) {
-            firstSheetRow[indexPriceInFirstSheet] = row[indexPriceInN];
-            firstSheetRow[indexAmountInFirstSheet] = firstSheetRow[indexWorkDays];
+          if (N[i][findIndex(N[0],"מחיר")]) {
+            firstSheet[j][indexPriceInFirstSheet] = N[i][indexPriceInN];
+            firstSheet[j][indexAmountInFirstSheet] = firstSheet[j][indexWorkDays];
           
-          } else if (row[indexMonthlyInN]) {
-            firstSheetRow[indexMonthlyInFirstSheet] = row[indexMonthlyInN];
+          } else if (N[i][indexMonthlyInN]) {
+            firstSheet[j][indexMonthlyInFirstSheet] = N[i][indexMonthlyInN];
+            
           } else {
             errors.push(`${workerNumber} has "תוספת נסיעות" but no price`);
           }
         }
-      });
+      };
 
       if (!found) errors.push(`Couldn't find ${workerNumber} in the main sheet`);
     }
-  });
+  };
 
-  if (!N.some(row => row[indexOfType] === "תוספת נסיעות")) {
-    errors.push(`Couldn't find a worker with תוספת נסיעות`);
-  }
+  // if (!N.some(N[i][indexOfType] === "תוספת נסיעות")) {
+  //   errors.push(`Couldn't find a worker with תוספת נסיעות`);
+  // }
 }
 
 function handleTravelDiscountSenior(variables) {
-  const { N, firstSheet, indexOfType, indexPriceInFirstSheet, indexAmountInFirstSheet, indexMonthlyInFirstSheet, indexWorkDays, indexPriceInN, indexMonthlyInN } = variables;
+  const { N, firstSheet, indexOfType,  indexWorkDays } = variables;
 
-  N.forEach((row, i) => {
-    if (i === 0 || i === N.length - 1) return;
-
-    if (row[indexOfType] === "נסיעות מ ותיק") {
-      const workerNumber = row[0];
+  for (i=0;i<N.length-1;i++){
+   
+    if (N[i][indexOfType] === "נסיעות מ ותיק") {
+      const workerNumber = N[i][0];
       let found = false;
 
-      firstSheet.forEach((firstSheetRow, j) => {
-        if (j === 0 || j === firstSheet.length - 1) return;
-
-        if (firstSheetRow[0] === workerNumber) {
+      for (j=0;j<firstSheet.length-1;j++) {
+      
+        if (firstSheet[j][0] === workerNumber) {
           found = true;
-          if (firstSheetRow[indexWorkDays] <= 8) {
-            firstSheetRow[findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 11;
-          } else if (firstSheetRow[indexWorkDays] > 8) {
-            firstSheetRow[findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 44.5;
+          if (firstSheet[j][indexWorkDays] <= 8) {
+            firstSheet[j][findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 11;
+          } else if (firstSheet[j][indexWorkDays] > 8) {
+            firstSheet[j][findIndex(firstSheet[0],"נסיעות ו מ סכום")] = 44.5;
             
           } else {
             errors.push(`${workerNumber} has "נסיעות מ ותיק" but no price`);
           }
         }
-      });
+      };
 
       if (!found) errors.push(`Couldn't find ${workerNumber} in the main sheet`);
     }
-  });
+  };
 
   if (!N.some(row => row[indexOfType] === "נסיעות מ ותיק")) {
     errors.push(`Couldn't find a worker with  נסיעות מ ותיק`);
@@ -199,49 +199,56 @@ function createNewExcel(data, errors) {
   XLSX.writeFile(workbook, "חדש.xlsx");
 }
 
-function logic(thisType, variables, lessThen, price, mPrice) {
-  const { N, firstSheet, indexOfType, indexWorkDays } = variables;
 
-  N.forEach((row, i) => {
-    if (i === 0 || i === N.length - 1) return;
+function logic(thisType, variables, lessThan, dayPrice, monthPrice) {
+  const { N, firstSheet, indexOfType, indexWorkDays,indexPriceInFirstSheet, indexAmountInFirstSheet,indexMonthlyInFirstSheet} = variables;
 
-    if (row[indexOfType] === thisType) {
-      const workerNumber = row[0];
+  for (let i = 1; i < N.length - 1; i++) {
+    if (N[i][indexOfType] === thisType) {
+      const workerNumber = N[i][0];
       let found = false;
 
-      firstSheet.forEach((firstSheetRow, j) => {
-        if (j === 0 || j === firstSheet.length - 1) return;
-
-        if (firstSheetRow[0] === workerNumber) {
+      for (let j = 1; j < firstSheet.length - 1; j++) {
+        if (firstSheet[j][0] === workerNumber) {
           found = true;
-          if (firstSheetRow[indexWorkDays] <= lessThen) {
-            byDay(variables, j, price);
-          } else if (firstSheetRow[indexWorkDays] > lessThen) {
-            byMonth(variables, j, mPrice);
+
+          if (firstSheet[j][indexWorkDays] <= lessThan) {
+            byDay(variables, j, dayPrice);
+            // Reset monthly payment to empty or 0
+            firstSheet[j][indexMonthlyInFirstSheet] = ""; // or 0 depending on your needs
           } else {
-            errors.push(`${workerNumber} has ${thisType} but no price`);
+            byMonth(variables, j, monthPrice);
+            // Reset daily payment to empty or 0
+            firstSheet[j][indexPriceInFirstSheet] = ""; // or 0 depending on your needs
+            firstSheet[j][indexAmountInFirstSheet] = ""; // or 0 depending on your needs
+          }
+
+          // Validate if both types are present, which should not happen
+          if (firstSheet[j][indexPriceInFirstSheet] && firstSheet[j][indexMonthlyInFirstSheet]) {
+            errors.push(`${workerNumber} has both daily and monthly payments`);
           }
         }
-      });
+      }
 
       if (!found) errors.push(`Couldn't find ${workerNumber} in the main sheet`);
     }
-  });
-
-  if (!N.some(row => row[indexOfType] === thisType)) {
-    errors.push(`Couldn't find a worker with ${thisType}`);
   }
 }
+
 
 function byDay(variables, j, price) {
   const { firstSheet, indexPriceInFirstSheet, indexAmountInFirstSheet, indexWorkDays } = variables;
   firstSheet[j][indexPriceInFirstSheet] = price;
   firstSheet[j][indexAmountInFirstSheet] = firstSheet[j][indexWorkDays];
+
+
 }
 
 function byMonth(variables, j, mPrice) {
   const { firstSheet, indexMonthlyInFirstSheet } = variables;
   firstSheet[j][indexMonthlyInFirstSheet] = mPrice;
+  
+
 }
 
 function updateIndexesForType(variables, priceHeader, amountHeader, monthlyHeader) {
