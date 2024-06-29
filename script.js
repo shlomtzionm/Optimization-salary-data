@@ -37,15 +37,15 @@ function handleExcel(e) {
       indexMonthlyInFirstSheet: null
     };
 
-    // checkIfEveryoneHaveTravel(variables.firstSheet, variables.N)
+    checkIfEveryoneHaveTravel(variables.firstSheet, variables.N)
     handleTravelRegular(variables);
-    // handleTravelRegularDiscount(variables);
-    // handleTravel75(variables);
-    // handleTravelRegularSenior(variables);
-    // handleTravelDiscountSenior(variables);
-    // handleTravelExtra(variables);
+    handleTravelRegularDiscount(variables);
+    handleTravel75(variables);
+    handleTravelRegularSenior(variables);
+    handleTravelDiscountSenior(variables);
+    handleTravelExtra(variables);
 
-    // deleteAllNAs(firstSheet);
+    deleteAllNAs(firstSheet);
     createNewExcel(firstSheet, errors);
     handleErrors(errors);
   };
