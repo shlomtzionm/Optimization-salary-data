@@ -110,9 +110,18 @@ function handleTravelExtra(variables) {
     }
   };
 
-  // if (!N.some(N[i][indexOfType] === "תוספת נסיעות")) {
-  //   errors.push(`Couldn't find a worker with תוספת נסיעות`);
-  // }
+  let hasTeusafotNesiaot = false;
+
+N.map(row => {
+  if (row[indexOfType] === "תוספת נסיעות") {
+    hasTeusafotNesiaot = true;
+  }
+});
+
+if (!hasTeusafotNesiaot) {
+  errors.push(`Couldn't find a worker with תוספת נסיעות`);
+}
+
 }
 
 function handleTravelDiscountSenior(variables) {
